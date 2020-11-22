@@ -54,7 +54,12 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -250,42 +255,47 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
         mCurrLocationMarker = mMap.addMarker(markerOptions);
 
-        String benchFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Bench data.csv";
-        String bikeFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Bicycle parking data.csv";
-        String infoFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Information pillar data.csv";
-        String litterFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Litter receptacle data.csv";
-        String newsFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Publication structure data.csv";
-        String noticeFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Poster board data.csv";
-        String posterFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Poster structure data.csv";
-        String transitFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Transit shelter data.csv";
-        String washroomFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Public washroom data.csv";
+        ArrayList<LatLng> benchList = null;
+        CSVReader csvReader = new CSVReader();
+        InputStream benchIS = getResources().openRawResource(R.raw.benchdata);
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(benchIS, Charset.forName("UTF-8"))
+        );
+        String line = "";
+        String cvsSplitBy = ",";
+        int latIndex = 0;
+        int lngIndex = 0;
+        try {
+            ArrayList<LatLng> latLng = new ArrayList();
+            line = reader.readLine();
+            String[] data = line.split(cvsSplitBy);
+            for (int i = 0; i < data.length; i ++) {
+                if (data[i].equals("LATITUDE")) {
+                    latIndex = i;
+                }
+                if (data[i].equals("LONGITUDE")) {
+                    lngIndex = i;
+                }
+            }
+            while ((line = reader.readLine()) != null) {
+                try {
+                    data = line.split(cvsSplitBy);
+                    LatLng dataLatLng = new LatLng(Double.parseDouble(data[latIndex]), Double.parseDouble(data[lngIndex]));
 
-        LatLng nearestItem = null;
-        CSVReader reader = new CSVReader();
+                    latLng.add(dataLatLng);
+                }
+                catch (NumberFormatException e) {
+                }
+            }
+            benchList = latLng;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        LatLng nearestBench = csvReader.findNearestItem(curPos, benchList);
 
-        ArrayList<LatLng> benchList = reader.latLngExtract(benchFile);
-        ArrayList<LatLng> bikeList = reader.latLngExtract(bikeFile);
-        ArrayList<LatLng> infoList = reader.latLngExtract(infoFile);
-        ArrayList<LatLng> litterList = reader.latLngExtract(litterFile);
-        ArrayList<LatLng> newsList = reader.latLngExtract(newsFile);
-        ArrayList<LatLng> noticeList = reader.latLngExtract(noticeFile);
-        ArrayList<LatLng> posterList = reader.latLngExtract(posterFile);
-        ArrayList<LatLng> transitList = reader.latLngExtract(transitFile);
-        ArrayList<LatLng> washroomList = reader.latLngExtract(washroomFile);
-
-        LatLng nearestBench = reader.findNearestItem(curPos, benchList);
-        LatLng nearestBike = reader.findNearestItem(curPos, bikeList);
-        LatLng nearestInfo = reader.findNearestItem(curPos, infoList);
-        LatLng nearestLitter = reader.findNearestItem(curPos, litterList);
-        LatLng nearestNews = reader.findNearestItem(curPos, newsList);
-        LatLng nearestNotice = reader.findNearestItem(curPos, noticeList);
-        LatLng nearestPoster = reader.findNearestItem(curPos, posterList);
-        LatLng nearestTransit = reader.findNearestItem(curPos, transitList);
-        LatLng nearestWashroom = reader.findNearestItem(curPos, washroomList);
-
-        mMap.addMarker(new MarkerOptions().position(nearestItem).title("Nearest Bench"));
+        mMap.addMarker(new MarkerOptions().position(nearestBench).title("Nearest Bench"));
         MarkerOptions destinationMarker = new MarkerOptions();
-        destinationMarker.position(nearestItem);
+        destinationMarker.position(nearestBench);
         destinationMarker.title("Nearest Bench");
         destinationMarker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 
