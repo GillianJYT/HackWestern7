@@ -1,12 +1,14 @@
 package com.example.hackathon;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -122,7 +124,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             buildGoogleApiClient();
             mMap.setMyLocationEnabled(true);
         }
+        CSVReader reader = new CSVReader();
+        String benchFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Bench data.csv";
 
+        Context context = getApplicationContext();
+        CharSequence text = Double.toString(reader.latLngExtract(benchFile).get(0).latitude);
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
     }
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
