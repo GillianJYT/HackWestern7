@@ -200,6 +200,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (mCurrLocationMarker != null) {
             mCurrLocationMarker.remove();
         }
+
         //Place current location marker
         LatLng curPos = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions();
@@ -207,11 +208,44 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         markerOptions.title("Current Position");
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
         mCurrLocationMarker = mMap.addMarker(markerOptions);
-        LatLng sydney = new LatLng(43.7700, -79.2520);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("French is Bench"));
+
+        String benchFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Bench data.csv";
+        String bikeFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Bicycle parking data.csv";
+        String infoFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Information pillar data.csv";
+        String litterFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Litter receptacle data.csv";
+        String newsFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Publication structure data.csv";
+        String noticeFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Poster board data.csv";
+        String posterFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Poster structure data.csv";
+        String transitFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Transit shelter data.csv";
+        String washroomFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Public washroom data.csv";
+
+        LatLng nearestItem = null;
+        CSVReader reader = new CSVReader();
+
+        ArrayList<LatLng> benchList = reader.latLngExtract(benchFile);
+        ArrayList<LatLng> bikeList = reader.latLngExtract(bikeFile);
+        ArrayList<LatLng> infoList = reader.latLngExtract(infoFile);
+        ArrayList<LatLng> litterList = reader.latLngExtract(litterFile);
+        ArrayList<LatLng> newsList = reader.latLngExtract(newsFile);
+        ArrayList<LatLng> noticeList = reader.latLngExtract(noticeFile);
+        ArrayList<LatLng> posterList = reader.latLngExtract(posterFile);
+        ArrayList<LatLng> transitList = reader.latLngExtract(transitFile);
+        ArrayList<LatLng> washroomList = reader.latLngExtract(washroomFile);
+
+        LatLng nearestBench = reader.findNearestItem(curPos, benchList);
+        LatLng nearestBike = reader.findNearestItem(curPos, bikeList);
+        LatLng nearestInfo = reader.findNearestItem(curPos, infoList);
+        LatLng nearestLitter = reader.findNearestItem(curPos, litterList);
+        LatLng nearestNews = reader.findNearestItem(curPos, newsList);
+        LatLng nearestNotice = reader.findNearestItem(curPos, noticeList);
+        LatLng nearestPoster = reader.findNearestItem(curPos, posterList);
+        LatLng nearestTransit = reader.findNearestItem(curPos, transitList);
+        LatLng nearestWashroom = reader.findNearestItem(curPos, washroomList);
+
+        mMap.addMarker(new MarkerOptions().position(nearestItem).title("Nearest Bench"));
         MarkerOptions destinationMarker = new MarkerOptions();
-        destinationMarker.position(sydney);
-        destinationMarker.title("French is Bench");
+        destinationMarker.position(nearestItem);
+        destinationMarker.title("Nearest Bench");
         destinationMarker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 
 //        CSVReader reader = new CSVReader();
@@ -229,7 +263,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 //        Toast toast = Toast.makeText(context, text, duration);
 //        toast.show();
 
-        String url = DirectionGetter.makeURL(curPos, sydney);
+        String url = DirectionGetter.makeURL(curPos, nearestBench);
 
         final String[] display = {"nothing"};
 
