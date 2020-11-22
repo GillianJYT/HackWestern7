@@ -1,12 +1,15 @@
 package com.example.hackathon;
 
 import android.Manifest;
+import android.app.Notification;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -162,9 +165,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mCurrLocationMarker.remove();
         }
         //Place current location marker
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        LatLng curPos = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
+        markerOptions.position(curPos);
         markerOptions.title("Current Position");
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
         mCurrLocationMarker = mMap.addMarker(markerOptions);
@@ -175,8 +178,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         destinationMarker.title("French is Bench");
         destinationMarker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 
+        String directions = DirectionGetter.httpRequest(curPos, sydney);
+
+        Context context = getApplicationContext();
+        CharSequence text = directions;
+        int duration = Toast.LENGTH_LONG;
+
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
+
         //move map camera
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(curPos));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
 
         //stop location updates
