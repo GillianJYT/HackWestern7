@@ -1,12 +1,23 @@
 <resources>
-    <!-- Reply Preference -->
-    <string-array name="reply_entries">
-        <item>Reply</item>
-        <item>Reply to all</item>
+    <!-- Location Permission -->
+    <string-array name="location_entries">
+        <item>Allow</item>
+        <item>Deny</item>
     </string-array>
 
-    <string-array name="reply_values">
-        <item>reply</item>
-        <item>reply_all</item>
+    <string-array name="location_values">
+        <item>allow</item>
+        <item>deny</item>
+    </string-array>
+
+    <!-- Storage Permission -->
+    <string-array name="storage_entries">
+        <item>Allow</item>
+        <item>Deny</item>
+    </string-array>
+
+    <string-array name="storage_values">
+        <item>allow</item>
+        <item>deny</item>
     </string-array>
 </resources>
