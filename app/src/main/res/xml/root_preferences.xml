@@ -33,7 +33,7 @@
             app:useSimpleSummaryProvider="true" />
 
         <SwitchPreferenceCompat
-            app:key="newspaper bins"
+            app:key="newspaper"
             app:title="@string/newspaper"
             app:useSimpleSummaryProvider="true" />
 
