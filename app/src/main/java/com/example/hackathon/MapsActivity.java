@@ -674,7 +674,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         int iterCount = 0;
         //while(!pathFound[0] && iterCount++ <1){
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                    (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                    (Request.Method.GET, benchUrl, null, new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             String temp = "Response: " + response.toString();
