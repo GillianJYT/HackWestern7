@@ -256,32 +256,33 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
         mCurrLocationMarker = mMap.addMarker(markerOptions);
 
+        // bench
         ArrayList<LatLng> benchList = null;
-        CSVReader csvReader = new CSVReader();
+        CSVReader reader = new CSVReader();
         InputStream benchIS = getResources().openRawResource(R.raw.benchdata);
-        BufferedReader reader = new BufferedReader(
+        BufferedReader benchReader = new BufferedReader(
                 new InputStreamReader(benchIS, Charset.forName("UTF-8"))
         );
-        String line = "";
-        String cvsSplitBy = ",";
-        int latIndex = 0;
-        int lngIndex = 0;
+        String benchLine = "";
+        String benchCvsSplitBy = ",";
+        int benchLatIndex = 0;
+        int benchLngIndex = 0;
         try {
             ArrayList<LatLng> latLng = new ArrayList();
-            line = reader.readLine();
-            String[] data = line.split(cvsSplitBy);
+            benchLine = benchReader.readLine();
+            String[] data = benchLine.split(benchCvsSplitBy);
             for (int i = 0; i < data.length; i ++) {
                 if (data[i].equals("LATITUDE")) {
-                    latIndex = i;
+                    benchLatIndex = i;
                 }
                 if (data[i].equals("LONGITUDE")) {
-                    lngIndex = i;
+                    benchLngIndex = i;
                 }
             }
-            while ((line = reader.readLine()) != null) {
+            while ((benchLine = benchReader.readLine()) != null) {
                 try {
-                    data = line.split(cvsSplitBy);
-                    LatLng dataLatLng = new LatLng(Double.parseDouble(data[latIndex]), Double.parseDouble(data[lngIndex]));
+                    data = benchLine.split(benchCvsSplitBy);
+                    LatLng dataLatLng = new LatLng(Double.parseDouble(data[benchLatIndex]), Double.parseDouble(data[benchLngIndex]));
 
                     latLng.add(dataLatLng);
                 }
@@ -292,30 +293,369 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } catch (IOException e) {
             e.printStackTrace();
         }
-        LatLng nearestBench = csvReader.findNearestItem(curPos, benchList);
+        LatLng nearestBench = reader.findNearestItem(curPos, benchList);
 
         mMap.addMarker(new MarkerOptions().position(nearestBench).title("Nearest Bench"));
-        MarkerOptions destinationMarker = new MarkerOptions();
-        destinationMarker.position(nearestBench);
-        destinationMarker.title("Nearest Bench");
-        destinationMarker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+        MarkerOptions benchMarker = new MarkerOptions();
+        benchMarker.position(nearestBench);
+        benchMarker.title("Nearest Bench");
+        benchMarker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 
-//        CSVReader reader = new CSVReader();
-//        String benchFile = "Street_furniture_Bench_data.csv";
-//        File file = this.getFileStreamPath(benchFile);
-//        if(file == null || !file.exists()) {
-//            System.out.println("FILE DONT EXIST");
-//        }
-//        System.out.println("FILE EXIST");
-//
-//        Context context = getApplicationContext();
-//        CharSequence text = Double.toString(reader.latLngExtract(benchFile).get(0).latitude);
-//        int duration = Toast.LENGTH_SHORT;
-//
-//        Toast toast = Toast.makeText(context, text, duration);
-//        toast.show();
+        // bike parking
+        ArrayList<LatLng> bikeList = null;
+        InputStream bikeIS = getResources().openRawResource(R.raw.bicycleparkingdata);
+        BufferedReader bikeReader = new BufferedReader(
+                new InputStreamReader(bikeIS, Charset.forName("UTF-8"))
+        );
+        String bikeLine = "";
+        String bikeCvsSplitBy = ",";
+        int bikeLatIndex = 0;
+        int bikeLngIndex = 0;
+        try {
+            ArrayList<LatLng> latLng = new ArrayList();
+            bikeLine = bikeReader.readLine();
+            String[] data = bikeLine.split(bikeCvsSplitBy);
+            for (int i = 0; i < data.length; i ++) {
+                if (data[i].equals("LATITUDE")) {
+                    bikeLatIndex = i;
+                }
+                if (data[i].equals("LONGITUDE")) {
+                    bikeLngIndex = i;
+                }
+            }
+            while ((bikeLine = bikeReader.readLine()) != null) {
+                try {
+                    data = bikeLine.split(bikeCvsSplitBy);
+                    LatLng dataLatLng = new LatLng(Double.parseDouble(data[bikeLatIndex]), Double.parseDouble(data[bikeLngIndex]));
 
-        String url = DirectionGetter.makeURL(curPos, nearestBench);
+                    latLng.add(dataLatLng);
+                }
+                catch (NumberFormatException e) {
+                }
+            }
+            bikeList = latLng;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        LatLng nearestBike = reader.findNearestItem(curPos, bikeList);
+
+        mMap.addMarker(new MarkerOptions().position(nearestBike).title("Nearest Bike Parking"));
+        MarkerOptions bikeMarker = new MarkerOptions();
+        bikeMarker.position(nearestBike);
+        bikeMarker.title("Nearest Bike Parking");
+        bikeMarker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+
+        // info
+        ArrayList<LatLng> infoList = null;
+        InputStream infoIS = getResources().openRawResource(R.raw.informationpillardata);
+        BufferedReader infoReader = new BufferedReader(
+                new InputStreamReader(infoIS, Charset.forName("UTF-8"))
+        );
+        String infoLine = "";
+        String infoCvsSplitBy = ",";
+        int infoLatIndex = 0;
+        int infoLngIndex = 0;
+        try {
+            ArrayList<LatLng> latLng = new ArrayList();
+            infoLine = infoReader.readLine();
+            String[] data = infoLine.split(infoCvsSplitBy);
+            for (int i = 0; i < data.length; i ++) {
+                if (data[i].equals("LATITUDE")) {
+                    infoLatIndex = i;
+                }
+                if (data[i].equals("LONGITUDE")) {
+                    infoLngIndex = i;
+                }
+            }
+            while ((infoLine = infoReader.readLine()) != null) {
+                try {
+                    data = infoLine.split(infoCvsSplitBy);
+                    LatLng dataLatLng = new LatLng(Double.parseDouble(data[infoLatIndex]), Double.parseDouble(data[infoLngIndex]));
+
+                    latLng.add(dataLatLng);
+                }
+                catch (NumberFormatException e) {
+                }
+            }
+            infoList = latLng;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        LatLng nearestInfo = reader.findNearestItem(curPos, infoList);
+
+        mMap.addMarker(new MarkerOptions().position(nearestInfo).title("Nearest Information Board"));
+        MarkerOptions infoMarker = new MarkerOptions();
+        infoMarker.position(nearestInfo);
+        infoMarker.title("Nearest Information Board");
+        infoMarker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+
+        // litter
+        ArrayList<LatLng> litterList = null;
+        InputStream litterIS = getResources().openRawResource(R.raw.litterreceptacledata);
+        BufferedReader litterReader = new BufferedReader(
+                new InputStreamReader(litterIS, Charset.forName("UTF-8"))
+        );
+        String litterLine = "";
+        String litterCvsSplitBy = ",";
+        int litterLatIndex = 0;
+        int litterLngIndex = 0;
+        try {
+            ArrayList<LatLng> latLng = new ArrayList();
+            litterLine = litterReader.readLine();
+            String[] data = litterLine.split(litterCvsSplitBy);
+            for (int i = 0; i < data.length; i ++) {
+                if (data[i].equals("LATITUDE")) {
+                    litterLatIndex = i;
+                }
+                if (data[i].equals("LONGITUDE")) {
+                    litterLngIndex = i;
+                }
+            }
+            while ((litterLine = litterReader.readLine()) != null) {
+                try {
+                    data = litterLine.split(litterCvsSplitBy);
+                    LatLng dataLatLng = new LatLng(Double.parseDouble(data[litterLatIndex]), Double.parseDouble(data[litterLngIndex]));
+
+                    latLng.add(dataLatLng);
+                }
+                catch (NumberFormatException e) {
+                }
+            }
+            litterList = latLng;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        LatLng nearestLitter = reader.findNearestItem(curPos, litterList);
+
+        mMap.addMarker(new MarkerOptions().position(nearestLitter).title("Nearest Garbage Bin"));
+        MarkerOptions litterMarker = new MarkerOptions();
+        litterMarker.position(nearestLitter);
+        litterMarker.title("Nearest Garbage Bin");
+        litterMarker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET));
+
+        // notice board
+        ArrayList<LatLng> noticeList = null;
+        InputStream noticeIS = getResources().openRawResource(R.raw.posterstructuredata);
+        BufferedReader noticeReader = new BufferedReader(
+                new InputStreamReader(noticeIS, Charset.forName("UTF-8"))
+        );
+        String noticeLine = "";
+        String noticeCvsSplitBy = ",";
+        int noticeLatIndex = 0;
+        int noticeLngIndex = 0;
+        try {
+            ArrayList<LatLng> latLng = new ArrayList();
+            noticeLine = noticeReader.readLine();
+            String[] data = noticeLine.split(noticeCvsSplitBy);
+            for (int i = 0; i < data.length; i ++) {
+                if (data[i].equals("LATITUDE")) {
+                    noticeLatIndex = i;
+                }
+                if (data[i].equals("LONGITUDE")) {
+                    noticeLngIndex = i;
+                }
+            }
+            while ((noticeLine = noticeReader.readLine()) != null) {
+                try {
+                    data = noticeLine.split(noticeCvsSplitBy);
+                    LatLng dataLatLng = new LatLng(Double.parseDouble(data[noticeLatIndex]), Double.parseDouble(data[noticeLngIndex]));
+
+                    latLng.add(dataLatLng);
+                }
+                catch (NumberFormatException e) {
+                }
+            }
+            noticeList = latLng;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        LatLng nearestNotice = reader.findNearestItem(curPos, noticeList);
+
+        mMap.addMarker(new MarkerOptions().position(nearestNotice).title("Nearest Notice Board"));
+        MarkerOptions noticeMarker = new MarkerOptions();
+        noticeMarker.position(nearestNotice);
+        noticeMarker.title("Nearest Notice Board");
+        noticeMarker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+
+        // poster board
+        ArrayList<LatLng> posterList = null;
+        InputStream posterIS = getResources().openRawResource(R.raw.posterboarddata);
+        BufferedReader posterReader = new BufferedReader(
+                new InputStreamReader(posterIS, Charset.forName("UTF-8"))
+        );
+        String posterLine = "";
+        String posterCvsSplitBy = ",";
+        int posterLatIndex = 0;
+        int posterLngIndex = 0;
+        try {
+            ArrayList<LatLng> latLng = new ArrayList();
+            posterLine = posterReader.readLine();
+            String[] data = posterLine.split(posterCvsSplitBy);
+            for (int i = 0; i < data.length; i ++) {
+                if (data[i].equals("LATITUDE")) {
+                    posterLatIndex = i;
+                }
+                if (data[i].equals("LONGITUDE")) {
+                    posterLngIndex = i;
+                }
+            }
+            while ((posterLine = posterReader.readLine()) != null) {
+                try {
+                    data = posterLine.split(posterCvsSplitBy);
+                    LatLng dataLatLng = new LatLng(Double.parseDouble(data[posterLatIndex]), Double.parseDouble(data[posterLngIndex]));
+
+                    latLng.add(dataLatLng);
+                }
+                catch (NumberFormatException e) {
+                }
+            }
+            posterList = latLng;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        LatLng nearestPoster = reader.findNearestItem(curPos, posterList);
+
+        mMap.addMarker(new MarkerOptions().position(nearestPoster).title("Nearest Poster Board"));
+        MarkerOptions posterMarker = new MarkerOptions();
+        posterMarker.position(nearestPoster);
+        posterMarker.title("Nearest Poster Board");
+        posterMarker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
+
+        // newsstand
+        ArrayList<LatLng> newsList = null;
+        InputStream newsIS = getResources().openRawResource(R.raw.publicationstructuredata);
+        BufferedReader newsReader = new BufferedReader(
+                new InputStreamReader(newsIS, Charset.forName("UTF-8"))
+        );
+        String newsLine = "";
+        String newsCvsSplitBy = ",";
+        int newsLatIndex = 0;
+        int newsLngIndex = 0;
+        try {
+            ArrayList<LatLng> latLng = new ArrayList();
+            newsLine = newsReader.readLine();
+            String[] data = newsLine.split(newsCvsSplitBy);
+            for (int i = 0; i < data.length; i ++) {
+                if (data[i].equals("LATITUDE")) {
+                    newsLatIndex = i;
+                }
+                if (data[i].equals("LONGITUDE")) {
+                    newsLngIndex = i;
+                }
+            }
+            while ((newsLine = newsReader.readLine()) != null) {
+                try {
+                    data = newsLine.split(newsCvsSplitBy);
+                    LatLng dataLatLng = new LatLng(Double.parseDouble(data[newsLatIndex]), Double.parseDouble(data[newsLngIndex]));
+
+                    latLng.add(dataLatLng);
+                }
+                catch (NumberFormatException e) {
+                }
+            }
+            newsList = latLng;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        LatLng nearestNews = reader.findNearestItem(curPos, newsList);
+
+        mMap.addMarker(new MarkerOptions().position(nearestNews).title("Nearest Newsstand"));
+        MarkerOptions newsMarker = new MarkerOptions();
+        newsMarker.position(nearestNews);
+        newsMarker.title("Nearest Newsstand");
+        newsMarker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+
+        // washroom
+        ArrayList<LatLng> washroomList = null;
+        InputStream washroomIS = getResources().openRawResource(R.raw.publicwashroomdata);
+        BufferedReader washroomReader = new BufferedReader(
+                new InputStreamReader(washroomIS, Charset.forName("UTF-8"))
+        );
+        String washroomLine = "";
+        String washroomCvsSplitBy = ",";
+        int washroomLatIndex = 0;
+        int washroomLngIndex = 0;
+        try {
+            ArrayList<LatLng> latLng = new ArrayList();
+            washroomLine = washroomReader.readLine();
+            String[] data = washroomLine.split(washroomCvsSplitBy);
+            for (int i = 0; i < data.length; i ++) {
+                if (data[i].equals("LATITUDE")) {
+                    washroomLatIndex = i;
+                }
+                if (data[i].equals("LONGITUDE")) {
+                    washroomLngIndex = i;
+                }
+            }
+            while ((washroomLine = washroomReader.readLine()) != null) {
+                try {
+                    data = washroomLine.split(washroomCvsSplitBy);
+                    LatLng dataLatLng = new LatLng(Double.parseDouble(data[washroomLatIndex]), Double.parseDouble(data[washroomLngIndex]));
+
+                    latLng.add(dataLatLng);
+                }
+                catch (NumberFormatException e) {
+                }
+            }
+            washroomList = latLng;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        LatLng nearestWashroom = reader.findNearestItem(curPos, washroomList);
+
+        // transit shelter
+        ArrayList<LatLng> transitList = null;
+        InputStream transitIS = getResources().openRawResource(R.raw.transitshelterdata);
+        BufferedReader transitReader = new BufferedReader(
+                new InputStreamReader(transitIS, Charset.forName("UTF-8"))
+        );
+        String transitLine = "";
+        String transitCvsSplitBy = ",";
+        int transitLatIndex = 0;
+        int transitLngIndex = 0;
+        try {
+            ArrayList<LatLng> latLng = new ArrayList();
+            transitLine = transitReader.readLine();
+            String[] data = transitLine.split(transitCvsSplitBy);
+            for (int i = 0; i < data.length; i ++) {
+                if (data[i].equals("LATITUDE")) {
+                    transitLatIndex = i;
+                }
+                if (data[i].equals("LONGITUDE")) {
+                    transitLngIndex = i;
+                }
+            }
+            while ((transitLine = transitReader.readLine()) != null) {
+                try {
+                    data = transitLine.split(transitCvsSplitBy);
+                    LatLng dataLatLng = new LatLng(Double.parseDouble(data[transitLatIndex]), Double.parseDouble(data[transitLngIndex]));
+
+                    latLng.add(dataLatLng);
+                }
+                catch (NumberFormatException e) {
+                }
+            }
+            transitList = latLng;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        LatLng nearestTransit = reader.findNearestItem(curPos, transitList);
+
+        mMap.addMarker(new MarkerOptions().position(nearestTransit).title("Nearest Transit Shelter"));
+        MarkerOptions transitMarker = new MarkerOptions();
+        transitMarker.position(nearestTransit);
+        transitMarker.title("Nearest Transit Shelter");
+        transitMarker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
+
+        String benchUrl = DirectionGetter.makeURL(curPos, nearestBench);
+        String bikeUrl = DirectionGetter.makeURL(curPos, nearestBike);
+        String infoUrl = DirectionGetter.makeURL(curPos, nearestInfo);
+        String litterUrl = DirectionGetter.makeURL(curPos, nearestLitter);
+        String noticeUrl = DirectionGetter.makeURL(curPos, nearestNotice);
+        String posterUrl = DirectionGetter.makeURL(curPos, nearestPoster);
+        String newsUrl = DirectionGetter.makeURL(curPos, nearestNews);
+        String washroomUrl = DirectionGetter.makeURL(curPos, nearestWashroom);
+        String transitUrl = DirectionGetter.makeURL(curPos, nearestTransit);
 
         final String[] display = {"nothing"};
 
