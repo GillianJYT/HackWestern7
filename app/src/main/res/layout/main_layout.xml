@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/main"
     tools:context=".MapsActivity">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -14,5 +13,6 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/map_fragment"/>
+    <include layout="@layout/activity_maps" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
