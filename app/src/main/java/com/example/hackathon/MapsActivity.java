@@ -43,6 +43,8 @@ import com.android.volley.VolleyError;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+//import org.apache.commons.lang3.ObjectUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -89,12 +91,14 @@ import java.util.List;
 //}
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
-        LocationListener,GoogleApiClient.ConnectionCallbacks,
+        LocationListener,GoogleApiClient.ConnectionCallbacks, GoogleMap.OnMarkerClickListener,
         GoogleApiClient.OnConnectionFailedListener{
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
     private GoogleMap mMap;
+    public static LatLng curPos = null;
+    public static ArrayList<MarkerOptions> nearestMarkers = new ArrayList<MarkerOptions>();
     Location mLastLocation;
     Marker mCurrLocationMarker;
     GoogleApiClient mGoogleApiClient;
@@ -238,13 +242,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         //Place current location marker
-        LatLng curPos = new LatLng(location.getLatitude(), location.getLongitude());
+        curPos = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(curPos);
         markerOptions.title("Current Position");
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
         mCurrLocationMarker = mMap.addMarker(markerOptions);
-
+        mMap.setOnMarkerClickListener(this);
         // bench
         ArrayList<LatLng> benchList = null;
         CSVReader reader = new CSVReader();
@@ -592,6 +596,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         LatLng nearestWashroom = reader.findNearestItem(curPos, washroomList);
 
+        mMap.addMarker(new MarkerOptions().position(nearestWashroom).title("Nearest Public Washroom"));
+        MarkerOptions washroomMarker = new MarkerOptions();
+        washroomMarker.position(nearestWashroom);
+        washroomMarker.title("Nearest Public Washroom");
+        washroomMarker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+
         // transit shelter
         ArrayList<LatLng> transitList = null;
         InputStream transitIS = getResources().openRawResource(R.raw.transitshelterdata);
@@ -636,104 +646,95 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         transitMarker.title("Nearest Transit Shelter");
         transitMarker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
 
-        String benchUrl = DirectionGetter.makeURL(curPos, nearestBench);
-        String bikeUrl = DirectionGetter.makeURL(curPos, nearestBike);
-        String infoUrl = DirectionGetter.makeURL(curPos, nearestInfo);
-        String litterUrl = DirectionGetter.makeURL(curPos, nearestLitter);
-        String noticeUrl = DirectionGetter.makeURL(curPos, nearestNotice);
-        String posterUrl = DirectionGetter.makeURL(curPos, nearestPoster);
-        String newsUrl = DirectionGetter.makeURL(curPos, nearestNews);
-        String washroomUrl = DirectionGetter.makeURL(curPos, nearestWashroom);
-        String transitUrl = DirectionGetter.makeURL(curPos, nearestTransit);
+        MarkerOptions[] nearestMarkersArr = {benchMarker,bikeMarker, infoMarker,litterMarker,noticeMarker,posterMarker,newsMarker,washroomMarker,transitMarker};
 
-        final String[] display = {"nothing"};
-
-        RequestQueue requestQueue;
-        // Instantiate the cache
-        Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024); // 1MB cap
-        // Set up the network to use HttpURLConnection as the HTTP client.
-        Network network = new BasicNetwork(new HurlStack());
-        // Instantiate the RequestQueue with the cache and network.
-        requestQueue = new RequestQueue(cache, network);
-        // Start the queue
-        requestQueue.start();
-
-        // Instantiate the RequestQueue.
-        boolean[] pathFound = {false};
-        int iterCount = 0;
-        //while(!pathFound[0] && iterCount++ <1){
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                    (Request.Method.GET, benchUrl, null, new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            String temp = "Response: " + response.toString();
-//                        Context context = getApplicationContext();
-//                        CharSequence text = temp;
-//                        int duration = Toast.LENGTH_LONG;
+        //String[] nearestURLS = new String[nearestItems.length];
+        for (int s = 0; s < nearestMarkersArr.length; s++){
+            nearestMarkers.add(nearestMarkersArr[s]);
+        }
 //
-//                        Toast toast = Toast.makeText(context, text, duration);
-//                        toast.show();
-
-                            String prePoly = "nothing";
-                            String pKey = "\"overview_polyline\":{\"points\":\"";
-                            try{
-                                //prePoly = response.getJSONArray("routes").getJSONArray(2).getJSONArray(6).getJSONObject(4).getString("points");
-                                int pPlace = response.toString().lastIndexOf(pKey);
-                                prePoly = response.toString().substring(pPlace + pKey.length());
-                                prePoly = prePoly.substring(0, prePoly.indexOf("\""));
-
-
-                                System.out.println();
-                                System.out.println();
-                                System.out.println(prePoly);
-                                System.out.println();
-                                System.out.println();
-
-                            }
-                            catch   (Exception e){
-                                System.out.println("JSON ERROR");
-                            }
-                            if (prePoly!=null){
-//                            Context context2 = getApplicationContext();
-//                            CharSequence text2 = prePoly;
-//                            int duration2 = Toast.LENGTH_LONG;
 //
-//                            Toast toast2 = Toast.makeText(context2, text2, duration2);
-//                            toast2.show();
-                                //List<LatLng> path = decodePoly(prePoly);
-                                List<LatLng> path = decodePath(response.toString());
-                                path.add(0, curPos);
-                                PolylineOptions pOpt = new PolylineOptions().clickable(true);
-
-                                for (int l = 0; l < path.size(); l++){
-                                    pOpt.add(path.get(l));
-                                }
-                                Polyline pLine1 = mMap.addPolyline(pOpt);
-                                pLine1.setTag("Get Benched");
-//                                if (new CSVReader().calculateDistanceByLatLng(nearestItem, path.get(path.size()-1))>350){
-//                                    pathFound[0] = false;
+//        final String[] display = {"nothing"};
+//
+//        RequestQueue requestQueue;
+//        Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024); // 1MB cap
+//        Network network = new BasicNetwork(new HurlStack());
+//        requestQueue = new RequestQueue(cache, network);
+//        requestQueue.start();
+//
+//        // Instantiate the RequestQueue.
+//            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+//                    (Request.Method.GET, benchUrl, null, new Response.Listener<JSONObject>() {
+//                        @Override
+//                        public void onResponse(JSONObject response) {
+//                            String temp = "Response: " + response.toString();
+////                        Context context = getApplicationContext();
+////                        CharSequence text = temp;
+////                        int duration = Toast.LENGTH_LONG;
+////
+////                        Toast toast = Toast.makeText(context, text, duration);
+////                        toast.show();
+//
+//                            String prePoly = "nothing";
+//                            String pKey = "\"overview_polyline\":{\"points\":\"";
+//                            try{
+//                                //prePoly = response.getJSONArray("routes").getJSONArray(2).getJSONArray(6).getJSONObject(4).getString("points");
+//                                int pPlace = response.toString().lastIndexOf(pKey);
+//                                prePoly = response.toString().substring(pPlace + pKey.length());
+//                                prePoly = prePoly.substring(0, prePoly.indexOf("\""));
+//
+//
+//                                System.out.println();
+//                                System.out.println();
+//                                System.out.println(prePoly);
+//                                System.out.println();
+//                                System.out.println();
+//
+//                            }
+//                            catch   (Exception e){
+//                                System.out.println("JSON ERROR");
+//                            }
+//                            if (prePoly!=null){
+////                            Context context2 = getApplicationContext();
+////                            CharSequence text2 = prePoly;
+////                            int duration2 = Toast.LENGTH_LONG;
+////
+////                            Toast toast2 = Toast.makeText(context2, text2, duration2);
+////                            toast2.show();
+//                                //List<LatLng> path = decodePoly(prePoly);
+//                                List<LatLng> path = decodePath(response.toString());
+//                                path.add(0, curPos);
+//                                PolylineOptions pOpt = new PolylineOptions().clickable(true);
+//
+//                                for (int l = 0; l < path.size(); l++){
+//                                    pOpt.add(path.get(l));
 //                                }
-//                                else{
-//                                    pathFound[0] = true;
-//                                }
-                            }
-
-
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            String temp = "ERROR";
-                            Context context = getApplicationContext();
-                            CharSequence text = temp;
-                            int duration = Toast.LENGTH_LONG;
-
-                            Toast toast = Toast.makeText(context, text, duration);
-                            toast.show();
-                        }
-                    });
-            requestQueue.add(jsonObjectRequest);
-        //}
+//                                Polyline pLine1 = mMap.addPolyline(pOpt);
+//                                pLine1.setTag("Get Benched");
+////                                if (new CSVReader().calculateDistanceByLatLng(nearestItem, path.get(path.size()-1))>350){
+////                                    pathFound[0] = false;
+////                                }
+////                                else{
+////                                    pathFound[0] = true;
+////                                }
+//                            }
+//
+//
+//                        }
+//                    }, new Response.ErrorListener() {
+//                        @Override
+//                        public void onErrorResponse(VolleyError error) {
+//                            String temp = "ERROR";
+//                            Context context = getApplicationContext();
+//                            CharSequence text = temp;
+//                            int duration = Toast.LENGTH_LONG;
+//
+//                            Toast toast = Toast.makeText(context, text, duration);
+//                            toast.show();
+//                        }
+//                    });
+//            requestQueue.add(jsonObjectRequest);
+//
 
 
 //        Context context = getApplicationContext();
@@ -823,6 +824,102 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         return poly;
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        mMap.clear();
+        for (int m = 0; m < nearestMarkers.size(); m++){
+            mMap.addMarker(nearestMarkers.get(m));
+        }
+
+        marker.getTitle();
+
+
+        final String[] display = {"nothing"};
+
+        String curUrl = DirectionGetter.makeURL(curPos,marker.getPosition());
+
+        RequestQueue requestQueue;
+        Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024); // 1MB cap
+        Network network = new BasicNetwork(new HurlStack());
+        requestQueue = new RequestQueue(cache, network);
+        requestQueue.start();
+
+        // Instantiate the RequestQueue.
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.GET, curUrl, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        String temp = "Response: " + response.toString();
+//                        Context context = getApplicationContext();
+//                        CharSequence text = temp;
+//                        int duration = Toast.LENGTH_LONG;
+//
+//                        Toast toast = Toast.makeText(context, text, duration);
+//                        toast.show();
+
+                        String prePoly = "nothing";
+                        String pKey = "\"overview_polyline\":{\"points\":\"";
+                        try{
+                            //prePoly = response.getJSONArray("routes").getJSONArray(2).getJSONArray(6).getJSONObject(4).getString("points");
+                            int pPlace = response.toString().lastIndexOf(pKey);
+                            prePoly = response.toString().substring(pPlace + pKey.length());
+                            prePoly = prePoly.substring(0, prePoly.indexOf("\""));
+
+
+                            System.out.println();
+                            System.out.println();
+                            System.out.println(prePoly);
+                            System.out.println();
+                            System.out.println();
+
+                        }
+                        catch   (Exception e){
+                            System.out.println("JSON ERROR");
+                        }
+                        if (prePoly!=null){
+//                            Context context2 = getApplicationContext();
+//                            CharSequence text2 = prePoly;
+//                            int duration2 = Toast.LENGTH_LONG;
+//
+//                            Toast toast2 = Toast.makeText(context2, text2, duration2);
+//                            toast2.show();
+                            //List<LatLng> path = decodePoly(prePoly);
+                            List<LatLng> path = decodePath(response.toString());
+                            path.add(0, curPos);
+                            PolylineOptions pOpt = new PolylineOptions().clickable(true);
+
+                            for (int l = 0; l < path.size(); l++){
+                                pOpt.add(path.get(l));
+                            }
+                            Polyline pLine1 = mMap.addPolyline(pOpt);
+                            pLine1.setTag("Get Benched");
+
+//                                if (new CSVReader().calculateDistanceByLatLng(nearestItem, path.get(path.size()-1))>350){
+//                                    pathFound[0] = false;
+//                                }
+//                                else{
+//                                    pathFound[0] = true;
+//                                }
+                        }
+
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        String temp = "ERROR";
+                        Context context = getApplicationContext();
+                        CharSequence text = temp;
+                        int duration = Toast.LENGTH_LONG;
+
+                        Toast toast = Toast.makeText(context, text, duration);
+                        toast.show();
+                    }
+                });
+        requestQueue.add(jsonObjectRequest);
+        return true;
     }
 }
 
