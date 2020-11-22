@@ -62,6 +62,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 
 //public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -329,11 +330,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         requestQueue.start();
 
         // Instantiate the RequestQueue.
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        String temp = "Response: " + response.toString();
+        boolean[] pathFound = {false};
+        int iterCount = 0;
+        //while(!pathFound[0] && iterCount++ <1){
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                    (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            String temp = "Response: " + response.toString();
 //                        Context context = getApplicationContext();
 //                        CharSequence text = temp;
 //                        int duration = Toast.LENGTH_LONG;
@@ -341,49 +345,67 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                        Toast toast = Toast.makeText(context, text, duration);
 //                        toast.show();
 
-                        String prePoly = "nothing";
-                        String pKey = "\"points\":\"";
-                        try{
-                            //prePoly = response.getJSONArray("routes").getJSONArray(2).getJSONArray(6).getJSONObject(4).getString("points");
-                            int pPlace = response.toString().lastIndexOf(pKey);
-                            prePoly = response.toString().substring(pPlace + pKey.length());
-                            prePoly = prePoly.substring(0, prePoly.indexOf("\""));
-                            System.out.println(response.toString());
-                        }
-                        catch   (Exception e){
-                            System.out.println("JSON ERROR");
-                        }
-                        if (prePoly!=null){
+                            String prePoly = "nothing";
+                            String pKey = "\"overview_polyline\":{\"points\":\"";
+                            try{
+                                //prePoly = response.getJSONArray("routes").getJSONArray(2).getJSONArray(6).getJSONObject(4).getString("points");
+                                int pPlace = response.toString().lastIndexOf(pKey);
+                                prePoly = response.toString().substring(pPlace + pKey.length());
+                                prePoly = prePoly.substring(0, prePoly.indexOf("\""));
+
+
+                                System.out.println();
+                                System.out.println();
+                                System.out.println(prePoly);
+                                System.out.println();
+                                System.out.println();
+
+                            }
+                            catch   (Exception e){
+                                System.out.println("JSON ERROR");
+                            }
+                            if (prePoly!=null){
 //                            Context context2 = getApplicationContext();
 //                            CharSequence text2 = prePoly;
 //                            int duration2 = Toast.LENGTH_LONG;
 //
 //                            Toast toast2 = Toast.makeText(context2, text2, duration2);
 //                            toast2.show();
-                            List<LatLng> path = decodePoly(prePoly);
-                            PolylineOptions pOpt = new PolylineOptions().clickable(true);
-                            for (int l = 0; l < path.size(); l++){
-                                pOpt.add(path.get(l));
+                                //List<LatLng> path = decodePoly(prePoly);
+                                List<LatLng> path = decodePath(response.toString());
+                                path.add(0, curPos);
+                                PolylineOptions pOpt = new PolylineOptions().clickable(true);
+
+                                for (int l = 0; l < path.size(); l++){
+                                    pOpt.add(path.get(l));
+                                }
+                                Polyline pLine1 = mMap.addPolyline(pOpt);
+                                pLine1.setTag("Get Benched");
+//                                if (new CSVReader().calculateDistanceByLatLng(nearestItem, path.get(path.size()-1))>350){
+//                                    pathFound[0] = false;
+//                                }
+//                                else{
+//                                    pathFound[0] = true;
+//                                }
                             }
-                            Polyline pLine1 = mMap.addPolyline(pOpt);
-                            pLine1.setTag("Get Benched");
+
+
                         }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            String temp = "ERROR";
+                            Context context = getApplicationContext();
+                            CharSequence text = temp;
+                            int duration = Toast.LENGTH_LONG;
 
+                            Toast toast = Toast.makeText(context, text, duration);
+                            toast.show();
+                        }
+                    });
+            requestQueue.add(jsonObjectRequest);
+        //}
 
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        String temp = "ERROR";
-                        Context context = getApplicationContext();
-                        CharSequence text = temp;
-                        int duration = Toast.LENGTH_LONG;
-
-                        Toast toast = Toast.makeText(context, text, duration);
-                        toast.show();
-                    }
-                });
-        requestQueue.add(jsonObjectRequest);
 
 //        Context context = getApplicationContext();
 //        CharSequence text = display[0];
@@ -415,7 +437,33 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onConnectionFailed(ConnectionResult connectionResult) {
     }
 
+    private List<LatLng> decodePath(String path){
+        String steps = "\"steps\":";
+        String endLoc = "end_location\":";
+        String stepsOn = path.substring(path.indexOf(steps)+steps.length());
+        List <LatLng> result = new ArrayList<LatLng>();
+        while (stepsOn.indexOf(endLoc)>0){
+            stepsOn = stepsOn.substring(stepsOn.indexOf(endLoc) + endLoc.length());
+            double lat = Double.parseDouble(stepsOn.substring(stepsOn.indexOf(":")+1, stepsOn.indexOf(",")));
+            stepsOn = stepsOn.substring(stepsOn.indexOf(",")+1);
+            double lng = Double.parseDouble(stepsOn.substring(stepsOn.indexOf(":")+1, stepsOn.indexOf("}")));
+            System.out.println("NEW POINT " + lat + " " + lng);
+            result.add(new LatLng(lat,lng));
+        }
+        return result;
+    }
+
     private List<LatLng> decodePoly(String encoded) {
+        //pad with 0
+        ArrayList<Character> paddedList = new ArrayList<Character>();
+        for (int c = 0; c < encoded.length(); c++){
+            paddedList.add(encoded.toCharArray()[c]);
+        }
+        paddedList.add(new Character((char)0));
+        paddedList.add(new Character((char)0));
+        paddedList.add(new Character((char)0));
+
+
         List<LatLng> poly = new ArrayList<LatLng>();
         int index = 0, len = encoded.length();
         int lat = 0, lng = 0;
@@ -423,7 +471,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         while (index < len) {
             int b, shift = 0, result = 0;
             do {
-                b = encoded.charAt(index++) - 63;
+                b = (char)paddedList.get(index++) - 63;
                 result |= (b & 0x1f) << shift;
                 shift += 5;
             } while (b >= 0x20);
@@ -433,7 +481,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             shift = 0;
             result = 0;
             do {
-                b = encoded.charAt(index++) - 63;
+                b = (char)paddedList.get(index++) - 63;
                 result |= (b & 0x1f) << shift;
                 shift += 5;
             } while (b >= 0x20);

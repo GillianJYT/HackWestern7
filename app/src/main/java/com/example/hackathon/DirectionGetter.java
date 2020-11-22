@@ -29,6 +29,7 @@ public class DirectionGetter {
         urlString.append(",");
         urlString.append(Double.toString(dest.longitude));
         urlString.append("&sensor=false&mode=walking&alternatives=false&key=AIzaSyAqWAa0kaqyrvMiJ2TAsPmM9xzn61n5G1I");
+        System.out.println(urlString);
         return urlString.toString();
     }
 
@@ -38,7 +39,10 @@ public class DirectionGetter {
         StringBuilder res = new StringBuilder();
         try {
             URL url = new URL(url_str);
+            System.out.println(url_str);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setConnectTimeout(60000);
+            conn.setReadTimeout(60000);
             conn.setRequestMethod("GET");
             BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             String line;
