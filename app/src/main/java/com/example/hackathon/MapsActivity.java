@@ -96,7 +96,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
-    private GoogleMap mMap;
+    public static GoogleMap mMap;
     public static LatLng curPos = null;
     public static ArrayList<MarkerOptions> nearestMarkers = new ArrayList<MarkerOptions>();
     Location mLastLocation;
@@ -651,6 +651,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         //String[] nearestURLS = new String[nearestItems.length];
         for (int s = 0; s < nearestMarkersArr.length; s++){
             nearestMarkers.add(nearestMarkersArr[s]);
+            nearestMarkers.get(s).visible(false);
         }
 //
 //
@@ -830,9 +831,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onMarkerClick(Marker marker) {
         mMap.clear();
         for (int m = 0; m < nearestMarkers.size(); m++){
-            mMap.addMarker(nearestMarkers.get(m));
-        }
+            if(nearestMarkers.get(m).isVisible()){
+                mMap.addMarker(nearestMarkers.get(m));
+            }
 
+        }
         marker.getTitle();
 
 

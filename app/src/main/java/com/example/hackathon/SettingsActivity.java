@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.SwitchPreferenceCompat;
 
 public class SettingsActivity extends AppCompatActivity {
     @Override
@@ -23,22 +24,30 @@ public class SettingsActivity extends AppCompatActivity {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
+
         }
 
         @Override
         public boolean onPreferenceTreeClick (Preference preference) {
-            String key = preference.getKey();
-            if(key.equals("bench")){
-                // do something
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("http://www.google.com"));
-                startActivity(intent);
-                return true;
-            } else if (key.equals("bike")) {
+            String key = (String)preference.getKey();
+            MapsActivity.mMap.clear();
 
-                return true;
-            } // else everything else
+
+            for(int i = 0; i<MapsActivity.nearestMarkers.size(); i++){
+                if (MapsActivity.nearestMarkers.get(i).getTitle().contains(key)){
+                    MapsActivity.nearestMarkers.get(i).visible(!MapsActivity.nearestMarkers.get(i).isVisible());
+                }
+            }
+
+            for(int i = 0; i<MapsActivity.nearestMarkers.size(); i++){
+                if(MapsActivity.nearestMarkers.get(i).isVisible()){
+                    MapsActivity.mMap.addMarker(MapsActivity.nearestMarkers.get(i));
+                }
+            }
+
+
             return false;
         }
     }
+
 }

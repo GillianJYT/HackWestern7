@@ -4,49 +4,58 @@
     <PreferenceCategory app:title="@string/filter_header">
 
         <SwitchPreferenceCompat
-            app:key="bench"
+            app:key="Nearest Bench"
             app:title="@string/bench"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="false"/>
 
         <SwitchPreferenceCompat
-            app:key="bike"
+            app:key="Nearest Bike Parking"
             app:title="@string/bike"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="false"/>
 
         <SwitchPreferenceCompat
-            app:key="washroom"
+            app:key="Nearest Public Washroom"
             app:title="@string/washroom"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="false"/>
 
         <SwitchPreferenceCompat
-            app:key="notice"
+            app:key="Nearest Notice Board"
             app:title="@string/notice"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="false"/>
 
         <SwitchPreferenceCompat
-            app:key="info"
+            app:key="Nearest Information Board"
             app:title="@string/info"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="false"/>
 
         <SwitchPreferenceCompat
-            app:key="poster board"
+            app:key="Nearest Poster Board"
             app:title="@string/poster"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="false"/>
 
         <SwitchPreferenceCompat
-            app:key="newspaper"
+            app:key="Nearest Newsstand"
             app:title="@string/newspaper"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="false"/>
 
         <SwitchPreferenceCompat
-            app:key="garbage bin"
+            app:key="Nearest Garbage Bin"
             app:title="@string/garbage"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="false"/>
 
         <SwitchPreferenceCompat
-            app:key="transit shelter"
+            app:key="Nearest Transit Shelter"
             app:title="@string/transit"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="false"/>
 
     </PreferenceCategory>
 
