@@ -14,16 +14,30 @@ public class CSVReader {
         String csvFile = filePath;
         String line = "";
         String cvsSplitBy = ",";
+        int latIndex = 0;
+        int lngIndex = 0;
 
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
 
             ArrayList<LatLng> latLng = new ArrayList();
 
+            line = br.readLine();
+            String[] data = line.split(cvsSplitBy);
+
+            for (int i = 0; i < data.length; i ++) {
+                if (data[i].equals("LATITUDE")) {
+                    latIndex = i;
+                }
+                if (data[i].equals("LONGITUDE")) {
+                    lngIndex = i;
+                }
+            }
+
             while ((line = br.readLine()) != null) {
 
                 try {
-                    String[] data = line.split(cvsSplitBy);
-                    LatLng dataLatLng = new LatLng(Double.parseDouble(data[19]), Double.parseDouble(data[18]));
+                    data = line.split(cvsSplitBy);
+                    LatLng dataLatLng = new LatLng(Double.parseDouble(data[latIndex]), Double.parseDouble(data[lngIndex]));
 
                     latLng.add(dataLatLng);
                 }
