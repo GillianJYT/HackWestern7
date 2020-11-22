@@ -3,9 +3,12 @@ package com.example.hackathon;
 import android.Manifest;
 import android.app.Notification;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
@@ -14,7 +17,9 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.android.volley.Cache;
@@ -92,21 +97,55 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         LocationListener,GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener{
 
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+
     private GoogleMap mMap;
     Location mLastLocation;
     Marker mCurrLocationMarker;
     GoogleApiClient mGoogleApiClient;
     LocationRequest mLocationRequest;
+    LocationManager locationManager;
+    String provider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_layout);
 
+        if (ContextCompat.checkSelfPermission(MapsActivity.this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            if (ActivityCompat.shouldShowRequestPermissionRationale(MapsActivity.this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)){
+                ActivityCompat.requestPermissions(MapsActivity.this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            }else{
+                ActivityCompat.requestPermissions(MapsActivity.this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            }
+        }
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults){
+        switch (requestCode){
+            case 1: {
+                if (grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    if (ContextCompat.checkSelfPermission(MapsActivity.this,
+                            Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED){
+                        Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
+                    }
+                }else{
+                    Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+        }
     }
 
     @Override
@@ -123,7 +162,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        // if the menu buttons are clicked, check which one was clicked
         if (id == R.id.action_settings) {
             settings_onClick();
             return true;
@@ -135,11 +174,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return super.onOptionsItemSelected(item);
     }
 
+    // action for settings button
     private void settings_onClick() {
         Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
         startActivity(intent);
     }
 
+    // action for about button
     private void about_onClick() {
         Intent intent = new Intent(getApplicationContext(), About.class);
         startActivity(intent);

@@ -22,6 +22,11 @@
     <string name="location_title">Location</string>
     <string name="storage_title">Storage</string>
 
+    <!-- Permission Requests -->
+    <string name="title_location_permission">req</string>
+    <string name="text_location_permission">req2</string>
+    <string name="ok">OK</string>
+
     <!-- Layout Strings -->
     <string name="title_activity_settings">SettingsActivity</string>
 
