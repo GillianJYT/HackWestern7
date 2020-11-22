@@ -124,15 +124,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             buildGoogleApiClient();
             mMap.setMyLocationEnabled(true);
         }
-        CSVReader reader = new CSVReader();
-        String benchFile = "/Users/edwar/AndroidStudioProjects/HackWestern7/data/Street furniture-Bench data.csv";
-
-        Context context = getApplicationContext();
-        CharSequence text = Double.toString(reader.latLngExtract(benchFile).get(0).latitude);
-        int duration = Toast.LENGTH_SHORT;
-
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
     }
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
