@@ -3,11 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SettingsActivity"
+    tools:context=".About"
     android:orientation="vertical">
 
     <FrameLayout
-        android:id="@+id/settings"
+        android:id="@+id/about"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 </LinearLayout>

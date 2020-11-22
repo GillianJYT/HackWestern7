@@ -127,13 +127,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (id == R.id.action_settings) {
             settings_onClick();
             return true;
+        } else if (id == R.id.about) {
+            about_onClick();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    public void settings_onClick() {
+    private void settings_onClick() {
         Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+        startActivity(intent);
+    }
+
+    private void about_onClick() {
+        Intent intent = new Intent(getApplicationContext(), About.class);
         startActivity(intent);
     }
 

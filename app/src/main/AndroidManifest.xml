@@ -22,7 +22,10 @@
         android:theme="@style/Theme.Hackathon" >
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings"></activity>
+            android:label="@string/settings"></activity>
+        <activity
+            android:name=".About"
+            android:label="@string/about"></activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
