@@ -21,10 +21,15 @@ public class CSVReader {
 
             while ((line = br.readLine()) != null) {
 
-                String[] data = line.split(cvsSplitBy);
-                LatLng dataLatLng = new LatLng(Double.parseDouble(data[20]), Double.parseDouble(data[19]));
+                try {
+                    String[] data = line.split(cvsSplitBy);
+                    LatLng dataLatLng = new LatLng(Double.parseDouble(data[19]), Double.parseDouble(data[18]));
 
-                latLng.add(dataLatLng);
+                    latLng.add(dataLatLng);
+                }
+                catch (NumberFormatException e) {
+
+                }
             }
 
             return latLng;
